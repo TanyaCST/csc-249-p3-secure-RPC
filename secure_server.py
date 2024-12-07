@@ -29,7 +29,7 @@ SERVER_PORT = args.server_port  # Port to listen on (non-privileged ports are > 
 
 # Format and return a certificate containing the server's socket information and public key
 def format_certificate(public_key):
-    unsigned_certificate = SERVER_IP+'|'+SERVER_PORT+'|'+public_key # replace this line
+    unsigned_certificate = f"{SERVER_IP}|{SERVER_PORT}|{public_key}" # replace this line
     print(f"Prepared the formatted unsigned certificate '{unsigned_certificate}'")
     return unsigned_certificate
 
@@ -60,20 +60,31 @@ def TLS_handshake_server(connection):
     ## Instructions ##
     # Fill this function in with the TLS handshake:
     #  * Receive a request for a TLS handshake from the client
-    print("---Receiving TLS Hankshake Request---")
-    connection.recv(1024)
-    print("---Request Recevied---")
+    print("---Receiving message from Client")
+    message = connection.recv(1024).decode()
+    
+    print("---Checking for TLS Request")
+
+    # If message contains TLS request, 
+    if "TLS Request" in message:
+        print("---Request Recevied")
+
+    
+    else:
+        print("---Not Receiving a TLS Request")
+        quit()
+    
 
     #  * Send a signed certificate to the client
     #    * A signed certificate variable should be available as 'signed_certificate'
-    print("---Sending Signed Certificate to Client---")
-    connection.sendAll(signed_certificate)
-    print("---Signed Certificate Sent---")
+    print(f"---Sending Signed Certificate {signed_certificate} to Client")
+    connection.sendall(signed_certificate.encode("utf-8"))
+    print(f"---Signed Certificate {signed_certificate} Sent")
 
     #  * Receive an encrypted symmetric key from the client
-    print("---Waiting for Encrypted Symmetric Key from Client---")
+    print("---Waiting for Encrypted Symmetric Key from Client")
     symm_key_encrypt = connection.recv(1024)
-    print("---Encrypted Symmetric Key Received---")
+    print(f"---Encrypted Symmetric Key {symm_key_encrypt} Received")
 
     #  * Decrypt and return the symmetric key for use in further communications with the client
     return symm_key_encrypt

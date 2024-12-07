@@ -51,45 +51,51 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
     ## Instructions ##
     # Fill this function in with the TLS handshake:
     #  * Request a TLS handshake from the server
-    print("---Sending TLS Request---")
+    print("---Sending TLS Request")
     TLS_request = "TLS Request"
-    connection.sendall(TLS_request.decode('utf-8'))
-    print("---Success---")
-    print("---Waiting for Server Response---")
+    connection.sendall(encode_message(TLS_request).encode('utf-8'))
+    print("---Success")
+    print("---Waiting for Server Response")
 
     #  * Receive a signed certificate from the server
     signed_certificate = connection.recv(1024)
-    print("---Signed Certificate Received---")
+    print(f"---Signed Certificate {signed_certificate} Received")
     
     #  * Verify the certificate with the certificate authority's public key
     #    * Use cryptography_simulator.verify_certificate()
-    print("---Verifying Certificate---")
+    print(f"---Verifying Certificate {signed_certificate}")
     decrypted_private_key = cryptgraphy_simulator.verify_certificate(CA_public_key, signed_certificate)
-    print("Verification Succeeded")
+    print("---Verification Succeeded")
 
     #  * Extract the server's public key, IP address, and port from the certificate
-    print("---Extracting server's public key, IP address, and port---")
-    decrypted_private_key = decrypted_private_key.to_str()
-    public_key_s, key_server_ip, key_server_port = decrypted_private_key.split("|")
-    print("Extraction Succeeded")
+    print("---Extracting server's public key, IP address, and port")
+    key_server_ip, key_server_port, public_key_s = decrypted_private_key.split("|")
+    print("---Extraction Succeeded")
+    print(f"---Public Key: {public_key_s} | Server IP: {key_server_ip} | Server Port:{key_server_port}")
 
     #  * Verify that you're communicating with the port and IP specified in the certificate
-    print("---Verifying Public Key, Server IP, Server Port---")
-    if public_key_s == CA_public_key and key_server_ip == server_ip and key_server_port == server_port:
-        print("---The Client IS Communicating with the port and IP specified in the certificate---")
+    print("---Verifying Server IP, Server Port")
+    if key_server_ip == server_ip and key_server_port == server_port:
+        print("---The Client IS Communicating with the port and IP specified in the certificate")
     else:
-        print("---The Client **IS NOT** Communicating with the port and IP specified in the certificate---")
+        print("---The Client **IS NOT** Communicating with the port and IP specified in the certificate")
 
     #  * Generate a symmetric key to send to the server
     #    * Use cryptography_simulator.generate_symmetric_key()
+    print("---Generate a symmetric key")
     symmetric_key_client = cryptgraphy_simulator.generate_symmetric_key()
-    
+    print(f"---Symmetric Key: {symmetric_key_client}")
+
     #  * Use the server's public key to encrypt the symmetric key
     #    * Use cryptography_simulator.public_key_encrypt()
-    symmetric_key_encrypted = cryptgraphy_simulator.public_key_encrypt(symmetric_key_client, public_key_s)
+    print(f"---Encrypting the Symmetric Key {symmetric_key_client} using Server's Public Key {public_key_s}")
+    symmetric_key_encrypted = cryptgraphy_simulator.public_key_encrypt(public_key_s, symmetric_key_client)
+    print(f"---Symmetric Key Encrypted: {symmetric_key_encrypted}")
 
     #  * Send the encrypted symmetric key to the server
-    connection.sendall(symmetric_key_encrypted.decode('utf-8'))
+    print(f"---Sending Encrypted Symmetric Key {symmetric_key_encrypted} to server")
+    connection.sendall(symmetric_key_encrypted.encode('utf-8'))
+    print("---Success")
 
     #  * Return the symmetric key for use in further communications with the server
     # Make sure to use encode_message() on the first message so the VPN knows which 
