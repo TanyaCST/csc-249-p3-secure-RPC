@@ -1,10 +1,36 @@
 # TLS Handshake Formatting Document
 
 ## Application Overview
+This application provides a TLS handshake which provides a secure connection between a client, a server, and a VPN by verifying each others' identity using certificate from the certificate authority and agreements on keys.
+
+## Format of Unsigned Certificate
+$127.0.0.1|65432|(53693, 56533)
+
+## Walkthorough of the steps of a TLS handshake
+Before connecting to client through VPN, the server generates a public/private key pair, creates a certificate containing server IP, server port, and public key, and send the formatted certificate to certificate authority for signing.
+
+The certificate authority receives the formatted certificate and signs on the certificate. Then, it sends the signed certificate back to server.
+
+Receiving the signed certificate, the server waits for client's TLS request. Client sends a TLS request to server. Server receives the request and sends the signed certificate to client.
+
+The client receives the signed certificate, verifys the certificate, and extracts server's public key, IP address, and port from the certificate. Then, client double checks whether the server's IP address and port are the correct destination, generates a symmetric key, encrypts the symmetric key using server's public key, and send the encrypted symmetric key to server.
+
+The server receives the encrypted symmetric key and decrypt the key for further use.
+
+The client encrypts the generated symmetric key before sending it to the server. If it doesn't, the VPN will be able to read the symmetric key in transit and use it to decrypt further secure communications between the client and server encrypted and HMAC'd with that key.
 
 
 
-## Sample Output
+## Two ways in which our simulation fails to achieve real security
+1. Our simulation skips the process of verifying server's identity with the certificate authority. It makes our simulation vulnerable to imperson attack, which means attackers can pretend they are the correct server and alter the communication between the desired server and client.
+2. The encryption and decryption algorithms are relative simple because they preserves the keys as what they are. Therefore, attackers can easily decrypt the messages and ontain the private keys.
+
+## Example Output
+**Note: The example output and the command-line traces below are generated based on echo client and server, which means the client input should be the same as the server output.**
+**Client Input:** Hello, World
+**Server Output** Hello, World
+
+## Command-line Traces
 #### certificate_authority.py
 Certificate Authority started using public key '(22952, 56533)' and private key '33581'
 Certificate authority starting - listening for connections at IP 127.0.0.1 and port 55553
@@ -86,4 +112,4 @@ Received raw response: 'b'HMAC_30276[symmetric_5047[Hello, world]]'' [40 bytes]
 Decoded message 'Hello, world' from server
 client is done!
 
-## Reference
+## Acknowledgements
