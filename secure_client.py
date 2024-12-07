@@ -75,7 +75,8 @@ def TLS_handshake_client(connection, server_ip=SERVER_IP, server_port=SERVER_POR
 
     #  * Verify that you're communicating with the port and IP specified in the certificate
     print("---Verifying Server IP, Server Port")
-    if key_server_ip == server_ip and key_server_port == server_port:
+    print(f"---Accurate Server IP: {SERVER_IP} Port:{SERVER_PORT}")
+    if (key_server_ip == SERVER_IP) and (cryptgraphy_simulator._to_int(key_server_port) == SERVER_PORT):
         print("---The Client IS Communicating with the port and IP specified in the certificate")
     else:
         print("---The Client **IS NOT** Communicating with the port and IP specified in the certificate")
