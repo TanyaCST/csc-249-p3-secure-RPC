@@ -87,7 +87,9 @@ def TLS_handshake_server(connection):
     print(f"---Encrypted Symmetric Key {symm_key_encrypt} Received")
 
     #  * Decrypt and return the symmetric key for use in further communications with the client
-    return symm_key_encrypt
+    symm_key_decrypt = cryptgraphy_simulator.private_key_decrypt(private_key,symm_key_encrypt)
+    
+    return symm_key_decrypt
 
 def process_message(message):
     # Change this function to change the service your server provides
